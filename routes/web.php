@@ -14,5 +14,5 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    return 'Back-End Keperawatan by Lumen Laravel';
 });
