@@ -9,11 +9,11 @@ use App\Models\RespondensModel;
 
 class ApiGetMiddleware{
     public function handle($request, Closure $next){
-        $username = $request->query('id');
+        $token = $request->header('token');
         try {
-            $data = RespondensModel::findOne(['username_responden'=>$username]);
+            $data = RespondensModel::findOne(['username'=>$username]);
             if($data){
-                $request->merge(['dataResponden' => (array) $data]);
+                $request->dataResponden = $data;
                 return $next($request);
             } else {
                 $res = new \stdClass();

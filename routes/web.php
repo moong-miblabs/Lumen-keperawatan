@@ -30,13 +30,15 @@ $router->group(['prefix' => 'setup'], function () use ($router) {
 });
 
 $router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('dbsync', [
-        'uses' => 'Setup@dbsync'
+    $router->post('login', [
+        'uses' => 'Api@login'
     ]);
-    $router->get('seed', [
-        'uses' => 'Setup@seed'
+    $router->get('middleware', [
+        'middleware'    => 'apiGet',
+        'uses'          => 'Api@testMiddleware'
     ]);
-    $router->get('drop', [
-        'uses' => 'Setup@drop'
+    $router->post('middleware', [
+        'middleware'    => 'apiPost',
+        'uses'          => 'Api@testMiddleware'
     ]);
 });
