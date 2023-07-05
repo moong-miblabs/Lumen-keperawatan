@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Models\SetupModel;
+use App\Models\UsersModel;
 
 class Setup extends Controller{
     
@@ -60,6 +61,25 @@ class Setup extends Controller{
             $res->error_desc = 'Internal Server Error';
             $res->data = $e;
             return response()->json($res,500);
+        }
+    }
+
+    public function test(){
+        $where  = ['nama_user'=>'MAMAN'];
+        try {
+            $data = UsersModel::find();
+            $res = new \stdClass();
+            $res->error_code = 0;
+            $res->error_desc = '';
+            $res->data = $data;
+            return response()->json($res,200);
+        } catch(\Exception $e) {
+            return var_dump($e);
+            // $res = new \stdClass();
+            // $res->error_code = 5;
+            // $res->error_desc = 'Internal Server Error';
+            // $res->data = $e;
+            // return response()->json($res,500);
         }
     }
 }

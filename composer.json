@@ -6,7 +6,9 @@
     "type": "project",
     "require": {
         "php": "^8.0",
-        "laravel/lumen-framework": "^9.0"
+        "laravel/lumen-framework": "^9.0",
+        "nesbot/carbon": "^2.68",
+        "ramsey/uuid": "^4.7"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

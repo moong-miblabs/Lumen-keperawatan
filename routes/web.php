@@ -28,3 +28,15 @@ $router->group(['prefix' => 'setup'], function () use ($router) {
         'uses' => 'Setup@drop'
     ]);
 });
+
+$router->group(['prefix' => 'api'], function () use ($router) {
+    $router->get('dbsync', [
+        'uses' => 'Setup@dbsync'
+    ]);
+    $router->get('seed', [
+        'uses' => 'Setup@seed'
+    ]);
+    $router->get('drop', [
+        'uses' => 'Setup@drop'
+    ]);
+});
