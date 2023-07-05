@@ -16,3 +16,15 @@
 $router->get('/', function () use ($router) {
     return 'Back-End Keperawatan by Lumen Laravel';
 });
+
+$router->group(['prefix' => 'setup'], function () use ($router) {
+    $router->get('dbsync', [
+        'uses' => 'Setup@dbsync'
+    ]);
+    $router->get('seed', [
+        'uses' => 'Setup@seed'
+    ]);
+    $router->get('drop', [
+        'uses' => 'Setup@drop'
+    ]);
+});
