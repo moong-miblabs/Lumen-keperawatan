@@ -59,6 +59,14 @@ class SetupModel extends Model implements AuthenticatableContract, AuthorizableC
                 deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
             );
             COMMENT ON COLUMN prepos.jenis is 'PRE : Pre Test, POS : POS Test';
+
+            /*
+            CREATE TABLE IF NOT EXISTS debug(
+                id SERIAL PRIMARY KEY,
+                input1 JSON,
+                input2 JSONB
+            );
+            */
         ");
     }
 
