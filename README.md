@@ -120,7 +120,7 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 
 1. create bcrypt helper
 2. create directory `Helper` in `app` (if not exists)
-3. create file `BcryptHelper.php` in `app/Helper`
+3. create file `BcryptHelper.php` in `app/Helper/BcryptHelper.php`
 ```php
 <?php
 
@@ -143,7 +143,7 @@ class BcryptHelper{
 1. create jsonwebtoken helper
 2. run composer `composer require firebase/php-jwt`
 3. create directory `Helper` in `app` (if not exists)
-4. create file `JsonwebtokenHelper.php` in `app/Helper`
+4. create file `JsonwebtokenHelper.php` in `app/Helper/JsonwebtokenHelper.php`
 ```php
 <?php
 
@@ -170,6 +170,128 @@ class JsonwebtokenHelper{
         }
     }
 }
+```
+
+## Setup - 5
+
+1. create file `ApiGetMiddleware.php` in `app/Http/Middleware/ApiGetMiddleware.php`
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Response;
+
+use App\Models\RespondensModel;
+
+class ApiGetMiddleware{
+    public function handle($request, Closure $next){
+        $username = $request->query('id');
+        try {
+            $data = RespondensModel::findOne(['username_responden'=>$username]);
+            if($data){
+                $request->merge(['dataResponden' => (array) $data]);
+                return $next($request);
+            } else {
+                $res = new \stdClass();
+                $res->error_code = 4;
+                $res->error_desc = 'Unauthorized';
+                $res->data = [];
+                return response()->json($res,400);
+            }
+        } catch(\Exception $e) {
+            $res = new \stdClass();
+            $res->error_code = 5;
+            $res->error_desc = 'Internal Server Error';
+            $res->data = $e;
+            return response()->json($res,500);
+        }
+    }
+}
+
+```
+2. create file `ApiPostMiddleware.php` in `app/Http/Middleware/ApiPostMiddleware.php`
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Response;
+
+use App\Models\RespondensModel;
+
+class ApiPostMiddleware{
+    public function handle($request, Closure $next){
+        $username = $request->input('id');
+        try {
+            $data = RespondensModel::findOne(['username_responden'=>$username]);
+            if($data){
+                $request->merge(['dataResponden' => (array) $data]);
+                return $next($request);
+            } else {
+                $res = new \stdClass();
+                $res->error_code = 4;
+                $res->error_desc = 'Unauthorized';
+                $res->data = [];
+                return response()->json($res,400);
+            }
+        } catch(\Exception $e) {
+            $res = new \stdClass();
+            $res->error_code = 5;
+            $res->error_desc = 'Internal Server Error';
+            $res->data = $e;
+            return response()->json($res,500);
+        }
+    }
+}
+
+```
+3. create file `AuthMiddleware.php` in `app/Http/Middleware/AuthMiddleware.php`
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Response;
+
+use App\Helper\JsonwebtokenHelper;
+
+class AuthMiddleware{
+    public function handle($request, Closure $next){
+        $token = $request->header('token');
+        if(!$token) {
+            $res = new \stdClass();
+            $res->error_code = 4;
+            $res->error_desc = 'Unauthorized';
+            $res->data = [];
+            return response()->json($res,400);
+        }
+        try {
+            $decoded = JsonwebtokenHelper::verify($token);
+            if($decoded){
+                $request->merge(['dataToken' => (array) $decoded]);
+                return $next($request);
+            } else {
+                $res = new \stdClass();
+                $res->error_code = 4;
+                $res->error_desc = 'Unauthorized';
+                $res->data = [];
+                return response()->json($res,400);
+            }
+        } catch(\Exception $e) {
+            return $e;
+            $res = new \stdClass();
+            $res->error_code = 5;
+            $res->error_desc = 'Internal Server Error';
+            $res->data = $e;
+            return response()->json($res,500);
+        }
+    }
+}
+
 ```
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
