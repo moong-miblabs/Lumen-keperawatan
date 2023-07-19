@@ -42,3 +42,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
         'uses'          => 'Api@testMiddleware'
     ]);
 });
+
+$router->get('test',[
+    'uses' => 'Web@login'
+]);
