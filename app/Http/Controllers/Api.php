@@ -6,6 +6,8 @@ use Illuminate\Http\Response;
 
 use App\Models\RespondensModel;
 
+use App\Helper\BcryptHelper;
+
 class Api extends Controller{
     
     public function __construct(){
@@ -18,10 +20,10 @@ class Api extends Controller{
         try {
             $data = RespondensModel::findOne(['username_responden'=>$username]);
             if($data){
-                if ($password == $data->password_responden) {
-                    return new Response($data->nama_responden, 200);
+                if (BcryptHelper::compare($password,$data->password_responden)) {
+                    return new Response(ucwords(strtolower($data->nama_responden)), 200);
                 } else {
-                    return new Response('fail', 400);
+                    return new Response('fail', 200);
                 }
             } else {
                 return new Response('fail', 400);

@@ -19,7 +19,6 @@ class AuthMiddleware{
         }
         try {
             $decoded = JsonwebtokenHelper::verify($token);
-            // return var_dump($decoded);
             if($decoded){
                 $request->merge(['dataToken' => (array) $decoded]);
                 return $next($request);
