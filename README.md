@@ -77,7 +77,7 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 	    }
 	}
 	```
-	2. register Cors Middleware as global middleware in bootstrap\app.php
+	2. register Cors Middleware as global middleware in bootstrap/app.php
 	```php
 	/*
 	|--------------------------------------------------------------------------
@@ -120,7 +120,7 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 
 1. create bcrypt helper
 2. create directory `Helper` in `app` (if not exists)
-3. create file `BcryptHelper.php` in `Helper`
+3. create file `BcryptHelper.php` in `app/Helper`
 ```php
 <?php
 
@@ -143,7 +143,7 @@ class BcryptHelper{
 1. create jsonwebtoken helper
 2. run composer `composer require firebase/php-jwt`
 3. create directory `Helper` in `app` (if not exists)
-4. create file `JsonwebtokenHelper.php` in `Helper`
+4. create file `JsonwebtokenHelper.php` in `app/Helper`
 ```php
 <?php
 
