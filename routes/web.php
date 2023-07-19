@@ -43,6 +43,15 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     ]);
 });
 
-$router->get('test',[
+$router->post('login',[
     'uses' => 'Web@login'
+]);
+
+$router->post('verify',[
+    'uses' => 'Web@verify'
+]);
+
+$router->get('home',[
+    'middleware'    => 'auth',
+    'uses'          => 'Web@home'
 ]);

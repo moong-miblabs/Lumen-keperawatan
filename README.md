@@ -25,7 +25,7 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 
 ## Setup - 1
 
-1. Setup .env
+1. Setup .env (DB and APP_KEY must be fill)
 2. Copy index.php and .htaccess from public, paste to ROOT. in index.php, replace path to bootstrap/app.php
 	```php
 	$app = require __DIR__.'/../bootstrap/app.php';
@@ -171,3 +171,68 @@ class JsonwebtokenHelper{
     }
 }
 ```
+
+⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
+
+# Authentication Respondens
+## End-point: Login
+### Method: POST
+>```
+>http://keperawatan.local/api/login
+>```
+### Body (**raw**) JSON
+
+```json
+{
+    "username" : "a",
+    "password" : "a"
+}
+```
+
+⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
+
+# Authentication Users
+## End-point: Login
+### Method: POST
+>```
+>http://keperawatan.local/login
+>```
+### Body (**raw**) JSON
+
+```json
+{
+    "username" : "admin",
+    "password" : "admin"
+}
+```
+
+
+⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
+
+## End-point: Verify Token
+### Method: POST
+>```
+>http://keperawatan.local/verify
+>```
+### Body (**raw**) JSON
+
+```json
+{
+    "token" : "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDBhZG1pbiJ9.gHe_N1W-Jbxephht3L_JeQAesg9XjLMH120mNPetU4s"
+}
+```
+
+
+⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
+
+## End-point: Home (Login Required, guarded by middleware auth)
+### Method: GET
+>```
+>http://keperawatan.local/home
+>```
+
+### Headers
+
+|Content-Type|Value|
+|---|---|
+|token|eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDBhZG1pbiJ9.gHe_N1W-Jbxephht3L_JeQAesg9XjLMH120mNPetU4s|
