@@ -20,7 +20,7 @@ class ApiPostMiddleware{
                 $res->error_code = 4;
                 $res->error_desc = 'Unauthorized';
                 $res->data = [];
-                return response()->json($res,400);
+                return response()->json($res,200);
             }
         } catch(\Exception $e) {
             $res = new \stdClass();

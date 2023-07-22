@@ -9,13 +9,20 @@ use App\Helper\JsonwebtokenHelper;
 
 class AuthMiddleware{
     public function handle($request, Closure $next){
-        $token = $request->header('token');
+        $token = $request->header('Authorization');
         if(!$token) {
-            $res = new \stdClass();
-            $res->error_code = 4;
-            $res->error_desc = 'Unauthorized';
-            $res->data = [];
-            return response()->json($res,400);
+            if ($request->isMethod('post')) {
+                $token = $request->input('token');
+            } else {
+                $token = $request->query('token');
+            }
+            if(!$token){
+                $res = new \stdClass();
+                $res->error_code = 4;
+                $res->error_desc = 'Unauthorized';
+                $res->data = [];
+                return response()->json($res,200);
+            }
         }
         try {
             $decoded = JsonwebtokenHelper::verify($token);
@@ -27,7 +34,7 @@ class AuthMiddleware{
                 $res->error_code = 4;
                 $res->error_desc = 'Unauthorized';
                 $res->data = [];
-                return response()->json($res,400);
+                return response()->json($res,200);
             }
         } catch(\Exception $e) {
             return $e;

@@ -26,7 +26,7 @@ class Api extends Controller{
                     return new Response('fail', 200);
                 }
             } else {
-                return new Response('fail', 400);
+                return new Response('fail', 200);
             }
         } catch(\Exception $e) {
             $res = new \stdClass();

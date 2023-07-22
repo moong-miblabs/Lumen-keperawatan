@@ -23,7 +23,7 @@ If you discover a security vulnerability within Lumen, please send an e-mail to 
 
 The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## Setup - 1
+## Setup - 1 : config, cors and prepare for model requirement
 
 1. Setup .env (DB and APP_KEY must be fill)
 2. Copy index.php and .htaccess from public, paste to ROOT. in index.php, replace path to bootstrap/app.php
@@ -99,8 +99,31 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 	//     'auth' => App\Http\Middleware\Authenticate::class,
 	// ]);
 	```
+4. Install ramsey/uuid, via `composer require ramsey/uuid`
+5. Install nesbot/carbon, via `composer require nesbot/carbon`
+6. (Optional) create Uuid helper
+    1. create directory `Helper` in `app` (if not exists)
+    2. create file `BcryptHelper.php` in `app/Helper/BcryptHelper.php`
+    ```php
+    <?php
 
-## Setup - 2
+    namespace App\Helper;
+
+    use \Ramsey\Uuid\Uuid;
+
+    class UuidHelper{
+
+        public static function v1(){
+            return Uuid::uuid1()->toString();
+        }
+
+        public static function v4(){
+            return Uuid::uuid4()->toString();
+        }
+    }
+    ```
+
+## Setup - 2 : dbsync, seed, drop
 
 1. Enable facades : uncomment `$app->withFacades();` in bootstrap/app.php
 2. Router Group : prefix => setup
@@ -116,7 +139,7 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 	2. seed
 	3. drop
 
-## Setup - 3
+## Setup - 3 : create Bcrypt Helper
 
 1. create bcrypt helper
 2. create directory `Helper` in `app` (if not exists)
@@ -138,7 +161,7 @@ class BcryptHelper{
 }
 ```
 
-## Setup - 4
+## Setup - 4 : create Jsonwebtoken Helper
 
 1. create jsonwebtoken helper
 2. run composer `composer require firebase/php-jwt`
@@ -172,7 +195,7 @@ class JsonwebtokenHelper{
 }
 ```
 
-## Setup - 5
+## Setup - 5 : create middlewares (apiget, apipost, auth)
 
 1. create file `ApiGetMiddleware.php` in `app/Http/Middleware/ApiGetMiddleware.php`
 ```php
@@ -198,7 +221,7 @@ class ApiGetMiddleware{
                 $res->error_code = 4;
                 $res->error_desc = 'Unauthorized';
                 $res->data = [];
-                return response()->json($res,400);
+                return response()->json($res,200);
             }
         } catch(\Exception $e) {
             $res = new \stdClass();
@@ -235,7 +258,7 @@ class ApiPostMiddleware{
                 $res->error_code = 4;
                 $res->error_desc = 'Unauthorized';
                 $res->data = [];
-                return response()->json($res,400);
+                return response()->json($res,200);
             }
         } catch(\Exception $e) {
             $res = new \stdClass();
@@ -261,13 +284,20 @@ use App\Helper\JsonwebtokenHelper;
 
 class AuthMiddleware{
     public function handle($request, Closure $next){
-        $token = $request->header('token');
+        $token = $request->header('Authorization');
         if(!$token) {
-            $res = new \stdClass();
-            $res->error_code = 4;
-            $res->error_desc = 'Unauthorized';
-            $res->data = [];
-            return response()->json($res,400);
+            if ($request->isMethod('post')) {
+                $token = $request->input('token');
+            } else {
+                $token = $request->query('token');
+            }
+            if(!$token){
+                $res = new \stdClass();
+                $res->error_code = 4;
+                $res->error_desc = 'Unauthorized';
+                $res->data = [];
+                return response()->json($res,200);
+            }
         }
         try {
             $decoded = JsonwebtokenHelper::verify($token);
@@ -279,7 +309,7 @@ class AuthMiddleware{
                 $res->error_code = 4;
                 $res->error_desc = 'Unauthorized';
                 $res->data = [];
-                return response()->json($res,400);
+                return response()->json($res,200);
             }
         } catch(\Exception $e) {
             return $e;
@@ -292,6 +322,53 @@ class AuthMiddleware{
     }
 }
 
+```
+
+## Setup - 6 : upload file
+
+1. install league/flysystem, via `composer require league/flysystem:^3.0`. Because Lumen dont have any storage, so we must install manually
+2. (Optional) create DateFormatHelper.php in `app/Http/Middleware/DateFormatMiddleware.php`
+```php
+<?php
+
+namespace App\Helper;
+
+class DateFormatHelper{
+
+    public static function file(){
+        date_default_timezone_set("Asia/Jakarta");
+        return date('YmdHis');
+    }
+}
+```
+3. script Contoller for uploading like shown below
+```php
+use Illuminate\Support\Facades\Storage;
+// if file sent as based64
+// then hasFile return false
+if($request->hasFile('foto')) {
+    $file       = $request->file('foto');
+    $extension  = $file->extension();
+
+    $destination_path   = './public/foto/';
+    $file_name          = DateFormatHelper::file() . '@'. $dataResponden['id'] . '.' . $extension;
+    $file->move($destination_path,$file_name);
+}
+// if file sent as based64
+// then input variabel (this case : foto) contain string 
+else {
+    // we need use Illuminate\Support\Facades\Storage;
+    $file_name  = DateFormatHelper::file() . '@'. $dataResponden['id'] . '.jpg';
+    $image      = base64_decode($request->input('foto'));
+    
+    $disk       = Storage::build([
+        'driver'    => 'local',
+        'root'      => 'public/foto',
+    ]);
+    $disk->put($file_name,$image);
+}
+// foto variabel for DB insert will set path of the file
+$foto       = '/public/foto/'.$file_name;
 ```
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
@@ -357,4 +434,4 @@ class AuthMiddleware{
 
 |Content-Type|Value|
 |---|---|
-|token|eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDBhZG1pbiJ9.gHe_N1W-Jbxephht3L_JeQAesg9XjLMH120mNPetU4s|
+|Authorization|eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDBhZG1pbiJ9.gHe_N1W-Jbxephht3L_JeQAesg9XjLMH120mNPetU4s|
