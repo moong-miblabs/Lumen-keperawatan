@@ -25,7 +25,7 @@ class Web extends Controller{
                     $res = new \stdClass();
                     $res->error_code    = 0;
                     $res->error_desc    = '';
-                    $res->data          = [];
+                    $res->data          = $data;
                     $res->token         = JsonwebtokenHelper::sign(['id'=>$data->id]);
                     return response()->json($res,200);
                 } else {
@@ -55,8 +55,14 @@ class Web extends Controller{
         $token = $request->input("token");
         try {
             $decode = JsonwebtokenHelper::verify($token);
+            if($decode) {
+                return new Response(true,200);
+            } else {
+                return new Response(false,200);
+            }
             return response()->json($decode,200);
         } catch(\Execption $e) {
+            return new Response(false,200);
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';

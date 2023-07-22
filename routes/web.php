@@ -43,15 +43,68 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     ]);
 });
 
+$router->group(['prefix' => 'web'], function () use ($router) {
+    $router->post('register', [
+        'uses' => 'Web@login'
+    ]);
+    $router->post('login', [
+        'uses' => 'Web@login'
+    ]);
+    $router->post('verify', [
+        'uses' => 'Web@verify'
+    ]);
+    $router->post('create-prepost', [
+        'middleware'    => 'apiGet',
+        'uses'          => 'Web@testMiddleware'
+    ]);
+    $router->get('list-prepost', [
+        'middleware'    => 'apiGet',
+        'uses'          => 'Web@testMiddleware'
+    ]);
+    $router->get('detail-prepost/{id}', [
+        'middleware'    => 'apiPost',
+        'uses'          => 'Web@testMiddleware'
+    ]);
+    $router->post('update-prepost/{id}', [
+        'middleware'    => 'apiGet',
+        'uses'          => 'Web@testMiddleware'
+    ]);
+    $router->get('delete-prepost/{id}', [
+        'middleware'    => 'apiGet',
+        'uses'          => 'Web@testMiddleware'
+    ]);
+});
+
 $router->post('login',[
-    'uses' => 'Web@login'
+    'uses' => 'Main@login'
 ]);
 
 $router->post('verify',[
-    'uses' => 'Web@verify'
+    'uses' => 'Main@verify'
 ]);
 
 $router->get('home',[
     'middleware'    => 'auth',
-    'uses'          => 'Web@home'
+    'uses'          => 'Main@home'
+]);
+
+$router->post('create-responden', [
+    'middleware'    => 'apiGet',
+    'uses'          => 'Main@testMiddleware'
+]);
+$router->get('list-responden', [
+    'middleware'    => 'apiGet',
+    'uses'          => 'Main@testMiddleware'
+]);
+$router->get('detail-responden/{id}', [
+    'middleware'    => 'apiPost',
+    'uses'          => 'Main@testMiddleware'
+]);
+$router->post('update-responden/{id}', [
+    'middleware'    => 'apiGet',
+    'uses'          => 'Main@testMiddleware'
+]);
+$router->get('delete-responden/{id}', [
+    'middleware'    => 'apiGet',
+    'uses'          => 'Main@testMiddleware'
 ]);
