@@ -9,6 +9,7 @@ class JsonwebtokenHelper{
 
     public static function sign($assocArr){
         $key = config('app.key');
+        $assocArr['iat'] = strtotime("now");
         // JWT::$leeway = 60; // $leeway in seconds
         return JWT::encode($assocArr, $key, 'HS256');
     }

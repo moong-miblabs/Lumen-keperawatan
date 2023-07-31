@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+// use Illuminate\Support\Facades\DB;
+
 use App\Models\UsersModel;
+use App\Models\RespondensModel;
+use App\Models\DemografiModel;
+use App\Models\RespondenDemografiModel;
 
 use App\Helper\BcryptHelper;
 use App\Helper\JsonwebtokenHelper;
@@ -47,7 +52,7 @@ class Main extends Controller{
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
             $res->data          = $e;
-            return response()->json($res,500);
+            return response()->json($res,200);
         }
     }
 
@@ -67,7 +72,7 @@ class Main extends Controller{
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
             $res->data          = $e;
-            return response()->json($res,500);
+            return response()->json($res,200);
         }
     }
 
@@ -90,15 +95,15 @@ class Main extends Controller{
                 $res = new \stdClass();
                 $res->error_code    = 5;
                 $res->error_desc    = 'Internal Server Error';
-                $res->data          = $e;
-                return response()->json($res,500);
+                $res->data          = [];
+                return response()->json($res,200);
             }
         } catch(\Execption $e) {
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
             $res->data          = $e;
-            return response()->json($res,500);
+            return response()->json($res,200);
         }
     }
 
@@ -107,7 +112,6 @@ class Main extends Controller{
         try {
             $data = RespondenDemografiModel::findOne(['id'=>$id]);
             if($data) {
-                $data->gender = $data->gender=='Laki-laki'?'L':'P';
                 $res = new \stdClass();
                 $res->error_code    = 0;
                 $res->error_desc    = '';
@@ -118,14 +122,14 @@ class Main extends Controller{
                 $res->error_code    = 5;
                 $res->error_desc    = 'Internal Server Error';
                 $res->data          = [];
-                return response()->json($res,500);
+                return response()->json($res,200);
             }
         } catch(\Execption $e) {
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
             $res->data          = $e;
-            return response()->json($res,500);
+            return response()->json($res,200);
         }
     }
 
@@ -133,59 +137,60 @@ class Main extends Controller{
         $dataToken = $request->input('dataToken');
 
         $nama_responden     = $request->input('nama_responden');
-        $username_responden = $request->input('nama_responden');
-        $password_responden = $request->input('nama_responden');
+        $username_responden = $request->input('username_responden');
+        $password_responden = $request->input('password_responden');
 
-        $umur               = $request->input('umur');
-        $gender             = $request->input('gender');
-        $kelurahan          = $request->input('kelurahan');
-        $rt                 = $request->input('rt');
-        $rw                 = $request->input('rw');
-        $alamat             = $request->input('alamat');
-        $anggota_keluarga   = $request->input('anggota_keluarga');
-        $luas_rumah         = $request->input('luas_rumah');
-        $pendidikan         = $request->input('pendidikan');
-        $pekerjaan          = $request->input('pekerjaan');
+        $kelompok           = $request->input('kelompok');        
 
         $obj = [];
-        $obj['nama_responden']      = $nama_responden;
+        $obj['nama_responden']      = strtoupper($nama_responden);
         $obj['username_responden']  = $username_responden;
         $obj['password_responden']  = BcryptHelper::hash($password_responden);
         try {
             $data = RespondensModel::findOne(['username_responden'=>$username_responden]);
             if($data) {
-                return new Response('gagal1',200);
+                $res = new \stdClass();
+                $res->error_code    = 4;
+                $res->error_desc    = 'Username sudah digunakan';
+                $res->data          = [];
+                return response()->json($res,200);
             } else {
                 $data2 = RespondensModel::create($obj);
                 if($data2) {
                     $obj1 = [];
                     $obj1['responden_id']   = $data2->id;
-                    $obj1['kelompok']       = 'II';
-                    $obj1['umur']           = $umur;
-                    $obj1['gender']         = $gender;
-                    $obj1['kelurahan']      = $kelurahan;
-                    $obj1['rt']             = $rt;
-                    $obj1['rw']             = $rw;
-                    $obj1['alamat']         = $alamat;
-                    $obj1['anggota_keluarga'] = $anggota_keluarga;
-                    $obj1['luas_rumah']     = $luas_rumah;
-                    $obj1['pendidikan']     = $pendidikan;
-                    $obj1['pekerjaan']      = $pekerjaan;
+                    $obj1['kelompok']       = $kelompok;
 
                     $data3 = DemografiModel::create($obj1);
 
                     if($data3) {
-                        return new Response('New record created successfully',200);
+                        $res = new \stdClass();
+                        $res->error_code    = 0;
+                        $res->error_desc    = '';
+                        $res->data          = array_merge((array) $data3, (array) $data2);
+                        return response()->json($res,200);
                     } else {
                         RespondensModel::destroy(['id'=>$data->id],true);
-                        return new Response('Error',200);
+                        $res = new \stdClass();
+                        $res->error_code    = 5;
+                        $res->error_desc    = 'Gagal menambahkan demografi';
+                        $res->data          = [];
+                        return response()->json($res,200);
                     }
                 } else {
-                    return new Response('Error',200);
+                    $res = new \stdClass();
+                    $res->error_code    = 5;
+                    $res->error_desc    = 'Gagal menambahkan responden';
+                    $res->data          = [];
+                    return response()->json($res,200);
                 }
             }
         } catch(\Exception $e) {
-            return new Response('Error',200);
+            $res = new \stdClass();
+            $res->error_code    = 5;
+            $res->error_desc    = 'Internal Server Error';
+            $res->data          = [];
+            return response()->json($res,200);
         }
     }
 
@@ -195,52 +200,62 @@ class Main extends Controller{
 
         $nama_responden     = $request->input('nama_responden');
         $username_responden = $request->input('username_responden');
-        $password_responden = BcryptHelper::hash($request->input('password_responden'));
+        $password_responden = $request->input('password_responden');
 
-        $umur               = $request->input('umur');
-        $gender             = $request->input('gender');
-        $kelurahan          = $request->input('kelurahan');
-        $rt                 = $request->input('rt');
-        $rw                 = $request->input('rw');
-        $alamat             = $request->input('alamat');
-        $anggota_keluarga   = $request->input('anggota_keluarga');
-        $luas_rumah         = $request->input('luas_rumah');
-        $pendidikan         = $request->input('pendidikan');
-        $pekerjaan          = $request->input('pekerjaan');
+        $kelompok           = $request->input('kelompok');        
 
         $obj = [];
-        $obj['nama_responden']      = $nama_responden;
+        $obj['nama_responden']      = strtoupper($nama_responden);
         $obj['username_responden']  = $username_responden;
         $obj['password_responden']  = BcryptHelper::hash($password_responden);
-
-        $obj1 = [];
-        $obj1['kelompok']       = 'II';
-        $obj1['umur']           = $umur;
-        $obj1['gender']         = $gender;
-        $obj1['kelurahan']      = $kelurahan;
-        $obj1['rt']             = $rt;
-        $obj1['rw']             = $rw;
-        $obj1['alamat']         = $alamat;
-        $obj1['anggota_keluarga']= $anggota_keluarga;
-        $obj1['luas_rumah']     = $luas_rumah;
-        $obj1['pendidikan']     = $pendidikan;
-        $obj1['pekerjaan']      = $pekerjaan;
         try {
-            $data = RespondensModel::_update($obj,['id'=>$id]);
-            $data1 = DemografiModel::_update($obj1,['responden_id'=>$id]);
+            $data = RespondensModel::findOne([
+                ['username_responden','=',$username_responden],
+                ['id','<>',$id]
+            ]);
+            if($data) {
+                $res = new \stdClass();
+                $res->error_code    = 4;
+                $res->error_desc    = 'Username sudah digunakan';
+                $res->data          = [];
+                return response()->json($res,200);
+            } else {
+                $data2 = RespondensModel::create($obj);
+                if($data2) {
+                    $obj1 = [];
+                    $obj1['responden_id']   = $data2->id;
+                    $obj1['kelompok']       = $kelompok;
 
-            $res = new \stdClass();
-            $res->error_code    = 0;
-            $res->error_desc    = '';
-            $res->data          = array_merge((array) $data1[0], (array) $data[0]);
-            return response()->json($res,200);
+                    $data3 = DemografiModel::create($obj1);
+
+                    if($data3) {
+                        $res = new \stdClass();
+                        $res->error_code    = 0;
+                        $res->error_desc    = '';
+                        $res->data          = array_merge((array) $data3, (array) $data2);
+                        return response()->json($res,200);
+                    } else {
+                        RespondensModel::destroy(['id'=>$data->id],true);
+                        $res = new \stdClass();
+                        $res->error_code    = 5;
+                        $res->error_desc    = 'Gagal menambahkan demografi';
+                        $res->data          = [];
+                        return response()->json($res,500);
+                    }
+                } else {
+                    $res = new \stdClass();
+                    $res->error_code    = 5;
+                    $res->error_desc    = 'Gagal menambahkan responden';
+                    $res->data          = [];
+                    return response()->json($res,200);
+                }
+            }
         } catch(\Exception $e) {
-            // return $e;
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = $e;
-            return response()->json($res,500);
+            $res->data          = [];
+            return response()->json($res,200);
         }
     }
 
@@ -259,14 +274,14 @@ class Main extends Controller{
                 $res->error_code    = 5;
                 $res->error_desc    = 'Internal Server Error';
                 $res->data          = $e;
-                return response()->json($res,500);
+                return response()->json($res,200);
             }
         } catch(\Execption $e) {
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
             $res->data          = $e;
-            return response()->json($res,500);
+            return response()->json($res,200);
         }
     }
 }

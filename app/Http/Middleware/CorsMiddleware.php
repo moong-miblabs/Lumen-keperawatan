@@ -29,11 +29,21 @@ class CorsMiddleware{
             }
 
             $response = $next($request);
-            foreach($headers as $key => $value){
-                $response->header($key, $value);
+            $IlluminateResponse = 'Illuminate\Http\Response';
+            $SymfonyResopnse = 'Symfony\Component\HttpFoundation\Response';
+            if($response instanceof $IlluminateResponse) {
+                foreach ($headers as $key => $value) {
+                    $response->header($key, $value);
+                }
+                return $response;
             }
 
-            return $response;
+            if($response instanceof $SymfonyResopnse) {
+                foreach ($headers as $key => $value) {
+                    $response->headers->set($key, $value);
+                }
+                return $response;
+            }
         }
     }
 }

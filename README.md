@@ -435,3 +435,64 @@ $foto       = '/public/foto/'.$file_name;
 |Content-Type|Value|
 |---|---|
 |Authorization|eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDBhZG1pbiJ9.gHe_N1W-Jbxephht3L_JeQAesg9XjLMH120mNPetU4s|
+
+
+⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
+
+## End-point: List Respondens
+### Method: GET
+>```
+>http://keperawatan.local/list-reponden
+>```
+
+### Headers
+
+|Content-Type|Value|
+|---|---|
+|Authorization|eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDBhZG1pbiJ9.gHe_N1W-Jbxephht3L_JeQAesg9XjLMH120mNPetU4s|
+
+⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
+
+## End-point: Detail Respondens
+### Method: GET
+>```
+>http://keperawatan.local/detail-reponden/{id}
+>```
+
+### Params
+
+|Key|Value|
+|---|---|
+|id|00000000-0000-0000-0000-000responden|
+
+### Headers
+
+|Content-Type|Value|
+|---|---|
+|Authorization|eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDBhZG1pbiJ9.gHe_N1W-Jbxephht3L_JeQAesg9XjLMH120mNPetU4s|
+
+⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
+
+## End-point: Create Respondens (unique username guarded)
+### Method: POST
+>```
+>http://keperawatan.local/create-responden
+>```
+
+### Body (**raw**) JSON
+
+```json
+{
+    "nama_responden"    : "munji",
+    "username_responden": "m",
+    "password_responden": "m",
+
+    "kelompok"          : "II"
+}
+```
+
+### Headers
+
+|Content-Type|Value|
+|---|---|
+|Authorization|eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDBhZG1pbiJ9.gHe_N1W-Jbxephht3L_JeQAesg9XjLMH120mNPetU4s|

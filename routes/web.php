@@ -54,23 +54,23 @@ $router->group(['prefix' => 'web'], function () use ($router) {
         'uses' => 'Web@verify'
     ]);
     $router->post('create-prepost', [
-        'middleware'    => 'apiGet',
+        'middleware'    => 'auth',
         'uses'          => 'Web@testMiddleware'
     ]);
     $router->get('list-prepost', [
-        'middleware'    => 'apiGet',
+        'middleware'    => 'auth',
         'uses'          => 'Web@testMiddleware'
     ]);
     $router->get('detail-prepost/{id}', [
-        'middleware'    => 'apiPost',
+        'middleware'    => 'auth',
         'uses'          => 'Web@testMiddleware'
     ]);
     $router->post('update-prepost/{id}', [
-        'middleware'    => 'apiGet',
+        'middleware'    => 'auth',
         'uses'          => 'Web@testMiddleware'
     ]);
     $router->get('delete-prepost/{id}', [
-        'middleware'    => 'apiGet',
+        'middleware'    => 'auth',
         'uses'          => 'Web@testMiddleware'
     ]);
 });
@@ -88,23 +88,23 @@ $router->get('home',[
     'uses'          => 'Main@home'
 ]);
 
-$router->post('create-responden', [
-    'middleware'    => 'apiGet',
-    'uses'          => 'Main@testMiddleware'
-]);
 $router->get('list-responden', [
-    'middleware'    => 'apiGet',
-    'uses'          => 'Main@testMiddleware'
+    'middleware'    => 'auth',
+    'uses'          => 'Main@listResponden'
 ]);
 $router->get('detail-responden/{id}', [
-    'middleware'    => 'apiPost',
-    'uses'          => 'Main@testMiddleware'
+    'middleware'    => 'auth',
+    'uses'          => 'Main@detailResponden'
+]);
+$router->post('create-responden', [
+    'middleware'    => 'auth',
+    'uses'          => 'Main@createResponden'
 ]);
 $router->post('update-responden/{id}', [
-    'middleware'    => 'apiGet',
-    'uses'          => 'Main@testMiddleware'
+    'middleware'    => 'auth',
+    'uses'          => 'Main@updateResponden'
 ]);
 $router->get('delete-responden/{id}', [
-    'middleware'    => 'apiGet',
-    'uses'          => 'Main@testMiddleware'
+    'middleware'    => 'auth',
+    'uses'          => 'Main@deleteResponden'
 ]);

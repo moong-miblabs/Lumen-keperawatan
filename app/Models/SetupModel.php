@@ -75,11 +75,14 @@ class SetupModel extends Model implements AuthenticatableContract, AuthorizableC
             INSERT INTO users(id,nama_user,username_user,password_user,created_at,updated_at,deleted_at) VALUES ('00000000-0000-0000-0000-0000000admin','PENELITI','admin','\$2a\$10\$O2hW0NX1QqFTzxZaGeD2Zepb5FQvGu5DY220yvZO93K2zv3.rWB4y',NOW(),NOW(),NULL);
 
             INSERT INTO respondens(id,nama_responden,username_responden,password_responden,created_at,updated_at,deleted_at) VALUES ('00000000-0000-0000-0000-000responden','IRFAN','a','\$2a\$10\$Rj0xHBNme3IvwNcYOqcDE.rKWzpSuKzj8idv9KE8jTiqk9gdJHFFu',NOW(),NOW(),NULL);
+            INSERT INTO demografi(id,responden_id,kelompok,created_at,updated_at,deleted_at) VALUES ('00000000-0000-0000-0000-00demografi','00000000-0000-0000-0000-000responden','II',NOW(),NOW(),NULL);
         ");
     }
 
     public static function drop(){
         DB::unprepared("
+            /* DROP TABLE IF EXISTS debug; */
+
             DROP TABLE IF EXISTS prepos;
             DROP TABLE IF EXISTS demografi;
             DROP TABLE IF EXISTS respondens;

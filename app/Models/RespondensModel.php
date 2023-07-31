@@ -21,7 +21,7 @@ class RespondensModel extends Model implements AuthenticatableContract, Authoriz
 
     public static function findAll(){
         try {
-            $data = DB::table(self::$_table)->whereNull('deleted_at')->orderBy('created_at','desc')->orderBy('id','asc')->get();
+            $data = DB::table(self::$_table)->whereNull('deleted_at')->orderBy('created_at','desc')->orderBy('id','desc')->get();
             return $data;
         } catch(\Exception $e) {
             return false;
@@ -37,21 +37,25 @@ class RespondensModel extends Model implements AuthenticatableContract, Authoriz
         }
     }
 
-    public static function findOne($where=[]){
+    public static function findOne($where=[],$order=null){
         try {
-            $data = DB::table(self::$_table)->whereNull('deleted_at')->where($where)->first();
+            if($order) {
+                $data = DB::table(self::$_table)->whereNull('deleted_at')->where($where)->orderByRaw(DB::raw($order))->first();
+            } else {
+                $data = DB::table(self::$_table)->whereNull('deleted_at')->where($where)->orderBy('created_at','asc')->orderBy('id','asc')->first();
+            }
             return $data;
         } catch(\Exception $e) {
-            throw $e;
+            return false;
         }
     }
 
-    public static function find($columns='*', $where=[], $order='', $limit=null){
+    public static function find($columns='*', $where=[], $order=null, $limit=null){
         try {
-            $data = DB::table(self::$_table)->selectRaw($columns)->whereNull('deleted_at')->where($where)->orderByRaw(DB::raw('created_at desc, id asc'.($order?', ':'').$order))->limit($limit)->get();
+            $data = DB::table(self::$_table)->selectRaw($columns)->whereNull('deleted_at')->where($where)->orderByRaw(DB::raw('created_at desc, id desc'.($order?', ':'').$order))->limit($limit)->get();
             return $data;
         } catch(\Exception $e) {
-            throw $e;
+            return false;
         }
     }
 
@@ -94,6 +98,7 @@ class RespondensModel extends Model implements AuthenticatableContract, Authoriz
     }
 
     public static function _update($obj,$where){
+        $obj['updated_at'] = Carbon::now();
         try {
             $arrId = DB::table(self::$_table)->where($where)->pluck('id');
             DB::table(self::$_table)->where($where)->update($obj);
@@ -118,7 +123,7 @@ class RespondensModel extends Model implements AuthenticatableContract, Authoriz
             }
             return $data;
         } catch(\Exception $e) {
-            throw $e;
+            return false;
         }
     }
 }

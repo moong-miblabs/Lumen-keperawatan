@@ -33,7 +33,7 @@ class Api extends Controller{
             $res->error_code = 5;
             $res->error_desc = 'Internal Server Error';
             $res->data = $e;
-            return response()->json($res,500);
+            return response()->json($res,200);
         }
     }
 
