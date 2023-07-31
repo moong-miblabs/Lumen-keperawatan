@@ -39,43 +39,53 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 	```php
 	<?php
 
-	namespace App\Http\Middleware;
+    namespace App\Http\Middleware;
 
-	use Closure;
+    use Closure;
 
-	class CorsMiddleware{
-	    public function handle($request, Closure $next){
-	        $origin = '*';
-	        // $origin = $request->server->get('HTTP_ORIGIN');
+    class CorsMiddleware{
+        public function handle($request, Closure $next){
+            $origin = '*';
+            // $origin = $request->server->get('HTTP_ORIGIN');
 
-	        $allowedOrigins = [
-	            NULL,
-	            '',
-	            ''
-	        ];
+            $allowedOrigins = [
+                NULL,
+                '',
+                ''
+            ];
 
-	        if(in_array($origin, $allowedOrigins) or $origin =='*'){    
-	            $headers = [
-	                'Access-Control-Allow-Origin'      => $origin,
-	                'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS, PUT, DELETE',
-	                'Access-Control-Allow-Credentials' => 'true',
-	                'Access-Control-Max-Age'           => '86400',
-	                'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With'
-	            ];
+            if(in_array($origin, $allowedOrigins) or $origin =='*'){    
+                $headers = [
+                    'Access-Control-Allow-Origin'      => $origin,
+                    'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS, PUT, DELETE',
+                    'Access-Control-Allow-Credentials' => 'true',
+                    'Access-Control-Max-Age'           => '86400',
+                    'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With'
+                ];
 
-	            if ($request->isMethod('OPTIONS')){
-	                return response()->json('{"method":"OPTIONS"}', 200, $headers);
-	            }
+                if ($request->isMethod('OPTIONS')){
+                    return response()->json('{"method":"OPTIONS"}', 200, $headers);
+                }
 
-	            $response = $next($request);
-	            foreach($headers as $key => $value){
-	                $response->header($key, $value);
-	            }
+                $response = $next($request);
+                $IlluminateResponse = 'Illuminate\Http\Response';
+                $SymfonyResopnse = 'Symfony\Component\HttpFoundation\Response';
+                if($response instanceof $IlluminateResponse) {
+                    foreach ($headers as $key => $value) {
+                        $response->header($key, $value);
+                    }
+                    return $response;
+                }
 
-	            return $response;
-	        }
-	    }
-	}
+                if($response instanceof $SymfonyResopnse) {
+                    foreach ($headers as $key => $value) {
+                        $response->headers->set($key, $value);
+                    }
+                    return $response;
+                }
+            }
+        }
+    }
 	```
 	2. register Cors Middleware as global middleware in bootstrap/app.php
 	```php
@@ -179,6 +189,7 @@ class JsonwebtokenHelper{
 
     public static function sign($assocArr){
         $key = config('app.key');
+        $assocArr['iat'] = strtotime("now");
         // JWT::$leeway = 60; // $leeway in seconds
         return JWT::encode($assocArr, $key, 'HS256');
     }
@@ -228,7 +239,7 @@ class ApiGetMiddleware{
             $res->error_code = 5;
             $res->error_desc = 'Internal Server Error';
             $res->data = $e;
-            return response()->json($res,500);
+            return response()->json($res,200);
         }
     }
 }
@@ -265,7 +276,7 @@ class ApiPostMiddleware{
             $res->error_code = 5;
             $res->error_desc = 'Internal Server Error';
             $res->data = $e;
-            return response()->json($res,500);
+            return response()->json($res,200);
         }
     }
 }
@@ -317,11 +328,10 @@ class AuthMiddleware{
             $res->error_code = 5;
             $res->error_desc = 'Internal Server Error';
             $res->data = $e;
-            return response()->json($res,500);
+            return response()->json($res,200);
         }
     }
 }
-
 ```
 
 ## Setup - 6 : upload file
@@ -335,9 +345,123 @@ namespace App\Helper;
 
 class DateFormatHelper{
 
-    public static function file(){
+    public static $arr_hari = [1=>'Senin','Selasa','Rabu','Kamis','Jum\'at','Sabtu','Minggu'];
+    public static $arr_bulan = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    public static $arr_bln = [1=>'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+    public static function file($d=null){
         date_default_timezone_set("Asia/Jakarta");
-        return date('YmdHis');
+        if($d) {
+            return date('YmdHis',strtotime($d));
+        } else {
+            return date('YmdHis');
+        }
+    }
+
+    public static function human($d=null){
+        date_default_timezone_set("Asia/Jakarta");
+        if($d) {
+            $num_hari = date('N',strtotime($d));
+        } else {
+            $num_hari = date('N');
+        }
+        $hari = self::$arr_hari[$num_hari];
+
+        if($d) {
+            $num_bulan = date('n',strtotime($d));
+        } else {
+            $num_bulan = date('n');
+        }
+        $bulan = self::$arr_bulan[$num_bulan];
+
+        if($d) {
+            $tgl = date('j',strtotime($d));
+        } else {
+            $tgl = date('j');
+        }
+        
+        if($d) {
+            return $hari . ", " . $tgl . " " . $bulan . " " . date('Y H:i',strtotime($d));
+        } else {
+            return $hari . ", " . $tgl . " " . $bulan . " " . date('Y H:i');
+        }
+    }
+
+    public static function humanDate($d=null){
+        date_default_timezone_set("Asia/Jakarta");
+        if($d) {
+            $num_hari = date('N',strtotime($d));
+        } else {
+            $num_hari = date('N');
+        }
+        $hari = self::$arr_hari[$num_hari];
+
+        if($d) {
+            $num_bulan = date('n',strtotime($d));
+        } else {
+            $num_bulan = date('n');
+        }
+        $bulan = self::$arr_bulan[$num_bulan];
+
+        if($d) {
+            $tgl = date('j',strtotime($d));
+        } else {
+            $tgl = date('j');
+        }
+        
+        if($d) {
+            return $hari . ", " . $tgl . " " . $bulan . " " . date('Y',strtotime($d));
+        } else {
+            return $hari . ", " . $tgl . " " . $bulan . " " . date('Y');
+        }
+    }
+
+    public static function dateGT($tanggal){
+        date_default_timezone_set("Asia/Jakarta");
+        $now        = date('Ymd');
+        $compare    = date('Ymd',strtotime($tanggal));
+
+        if($now>$compare) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static function dateLT($tanggal){
+        date_default_timezone_set("Asia/Jakarta");
+        $now        = date('Ymd');
+        $compare    = date('Ymd',strtotime($tanggal));
+
+        if($now<$compare) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static function dateGTE($tanggal){
+        date_default_timezone_set("Asia/Jakarta");
+        $now        = date('Ymd');
+        $compare    = date('Ymd',strtotime($tanggal));
+
+        if($now>=$compare) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static function dateLTE($tanggal){
+        date_default_timezone_set("Asia/Jakarta");
+        $now        = date('Ymd');
+        $compare    = date('Ymd',strtotime($tanggal));
+
+        if($now<=$compare) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 ```
