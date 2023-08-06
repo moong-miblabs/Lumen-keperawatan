@@ -34,10 +34,10 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 |DB::select()|Array of ArrayObject Class|
 
 >```
-> Laravel Collection always return ***TRUE***
-> Empty Array return ***FALSE***
+> Laravel Collection always return **_TRUE_**
+> Empty Array return **_FALSE_**
 > Use `toArray()` for convert Laravel Collection to Array of Associative Array
-> Use `isEmpty()` for check Laravel Collection is empty. return ***TRUE*** if empty 
+> Use `isEmpty()` for check Laravel Collection is empty. return **_TRUE_** if empty 
 >```
 
 ## Setup - 1 : config, cors and prepare for model requirement
