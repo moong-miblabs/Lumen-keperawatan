@@ -18,7 +18,8 @@ class Api extends Controller{
         $username = $request->input('username');
         $password = $request->input('password');
         try {
-            $data = RespondensModel::findOne(['username_responden'=>$username]);
+            $collection = RespondensModel::findOne(['username_responden'=>$username]);
+            $data = $collection->toArray();
             if($data){
                 if (BcryptHelper::compare($password,$data->password_responden)) {
                     return new Response(ucwords(strtolower($data->nama_responden)), 200);

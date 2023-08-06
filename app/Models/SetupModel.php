@@ -76,6 +76,9 @@ class SetupModel extends Model implements AuthenticatableContract, AuthorizableC
 
             INSERT INTO respondens(id,nama_responden,username_responden,password_responden,created_at,updated_at,deleted_at) VALUES ('00000000-0000-0000-0000-000responden','IRFAN','a','\$2a\$10\$Rj0xHBNme3IvwNcYOqcDE.rKWzpSuKzj8idv9KE8jTiqk9gdJHFFu',NOW(),NOW(),NULL);
             INSERT INTO demografi(id,responden_id,kelompok,created_at,updated_at,deleted_at) VALUES ('00000000-0000-0000-0000-00demografi','00000000-0000-0000-0000-000responden','II',NOW(),NOW(),NULL);
+
+            INSERT INTO respondens(id,nama_responden,username_responden,password_responden,created_at,updated_at,deleted_at) VALUES ('00000000-0000-0000-0000-00responden1','MUNJI','m','\$2a\$10\$3ETGu.3qhjOa78KaYKwkTujA1RYeWbcdf39cOnF5uyEWfyGJg/BKO',NOW(),NOW(),NULL);
+            INSERT INTO demografi(id,responden_id,kelompok,created_at,updated_at,deleted_at) VALUES ('00000000-0000-0000-0000-0demografi1','00000000-0000-0000-0000-00responden1','KK',NOW(),NOW(),NULL);
         ");
     }
 

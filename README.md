@@ -23,6 +23,21 @@ If you discover a security vulnerability within Lumen, please send an e-mail to 
 
 The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
+## List of Laravel Database response
+
+|Query Type|return value|
+|--|--|
+|DB::table()->get()|Laravel collection|
+|DB::table()->find()|ArrayObject Class|
+|DB::table()->first()|ArrayObject Class|
+|DB::table()->pluck()|Array|
+|DB::select()|Array of ArrayObject Class|
+
+> Laravel Collection always return ***TRUE***
+> Empty Array return ***FALSE***
+> Use `toArray()` for convert Laravel Collection to Array of Associative Array
+> Use `isEmpty()` for check Laravel Collection is empty. return ***TRUE*** if empty 
+
 ## Setup - 1 : config, cors and prepare for model requirement
 
 1. Setup .env (DB and APP_KEY must be fill)
@@ -493,6 +508,63 @@ else {
 }
 // foto variabel for DB insert will set path of the file
 $foto       = '/public/foto/'.$file_name;
+```
+
+
+## setup 7 : Download MS Excel (.xlsx)
+
+1. Install Laravel Excel via composer `composer require maatwebsite/excel`
+2. add the ServiceProvider in `bootstrap/app.php`
+```php
+    /*
+    |--------------------------------------------------------------------------
+    | Register Service Providers
+    |--------------------------------------------------------------------------
+    |
+    | Here we will register all of the application's service providers which
+    | are used to bind services into the container. Service providers are
+    | totally optional, so you are not required to uncomment this line.
+    |
+    */
+
+    $app->register(Maatwebsite\Excel\ExcelServiceProvider::class);
+    // $app->register(App\Providers\AppServiceProvider::class);
+    // $app->register(App\Providers\AuthServiceProvider::class);
+    // $app->register(App\Providers\EventServiceProvider::class);
+```
+3. you can create file `RespondensExport` in `app/Exports`
+```php
+    <?php
+
+    namespace App\Exports;
+
+    use App\Models\RespondensModel;
+    use Maatwebsite\Excel\Concerns\FromCollection;
+
+    class RespondensExport implements FromCollection
+    {
+        public function collection()
+        {
+            return RespondensModel::findAll();
+        }
+    }
+```
+4. In your controller you can call this export now
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Exports\RespondensExport;
+use Maatwebsite\Excel\Facades\Excel;
+
+class UsersController extends Controller 
+{
+    public function export() 
+    {
+        return Excel::download(new RespondensExport, 'respondens.xlsx');
+    }
+}
 ```
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃

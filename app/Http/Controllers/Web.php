@@ -46,8 +46,8 @@ class Web extends Controller{
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = $e;
-            return response()->json($res,500);
+            $res->data          = $e->getMessage();
+            return response()->json($res,200);
         }
     }
 
@@ -62,12 +62,11 @@ class Web extends Controller{
             }
             return response()->json($decode,200);
         } catch(\Execption $e) {
-            return new Response(false,200);
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = $e;
-            return response()->json($res,500);
+            $res->data          = $e->getMessage();
+            return response()->json($res,200);
         }
     }
 

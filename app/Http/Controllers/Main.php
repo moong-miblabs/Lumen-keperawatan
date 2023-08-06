@@ -51,7 +51,7 @@ class Main extends Controller{
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = $e;
+            $res->data          = $e->getMessage();
             return response()->json($res,200);
         }
     }
@@ -67,11 +67,10 @@ class Main extends Controller{
             }
             return response()->json($decode,200);
         } catch(\Execption $e) {
-            return new Response(false,200);
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = $e;
+            $res->data          = $e->getMessage();
             return response()->json($res,200);
         }
     }
@@ -84,7 +83,8 @@ class Main extends Controller{
     public function listResponden(Request $request){
         $dataToken = $request->input('dataToken');
         try {
-            $data = RespondenDemografiModel::findAll();
+            $collection = RespondenDemografiModel::findAll();
+            $data = $collection->toArray();
             if($data) {
                 $res = new \stdClass();
                 $res->error_code    = 0;
@@ -93,8 +93,8 @@ class Main extends Controller{
                 return response()->json($res,200);
             } else {
                 $res = new \stdClass();
-                $res->error_code    = 5;
-                $res->error_desc    = 'Internal Server Error';
+                $res->error_code    = 1;
+                $res->error_desc    = 'No Content';
                 $res->data          = [];
                 return response()->json($res,200);
             }
@@ -102,7 +102,7 @@ class Main extends Controller{
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = $e;
+            $res->data          = $e->getMessage();
             return response()->json($res,200);
         }
     }
@@ -119,8 +119,8 @@ class Main extends Controller{
                 return response()->json($res,200);
             } else {
                 $res = new \stdClass();
-                $res->error_code    = 5;
-                $res->error_desc    = 'Internal Server Error';
+                $res->error_code    = 1;
+                $res->error_desc    = 'No Content';
                 $res->data          = [];
                 return response()->json($res,200);
             }
@@ -128,7 +128,7 @@ class Main extends Controller{
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = $e;
+            $res->data          = $e->getMessage();
             return response()->json($res,200);
         }
     }
@@ -189,7 +189,7 @@ class Main extends Controller{
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = [];
+            $res->data          = $e->getMessage();
             return response()->json($res,200);
         }
     }
@@ -220,32 +220,33 @@ class Main extends Controller{
                 $res->data          = [];
                 return response()->json($res,200);
             } else {
-                $data2 = RespondensModel::create($obj);
+                $collection2 = RespondensModel::_update($obj,['id'=>$id]);
+                $data2 = $collection2->toArray();
                 if($data2) {
                     $obj1 = [];
-                    $obj1['responden_id']   = $data2->id;
+                    $obj1['responden_id']   = $data2[0]->id;
                     $obj1['kelompok']       = $kelompok;
 
-                    $data3 = DemografiModel::create($obj1);
+                    $collection3 = DemografiModel::_update($obj1,['responden_id'=>$id]);
+                    $data3 = $collection3->toArray();
 
                     if($data3) {
                         $res = new \stdClass();
                         $res->error_code    = 0;
                         $res->error_desc    = '';
-                        $res->data          = array_merge((array) $data3, (array) $data2);
+                        $res->data          = array_merge((array) $data3[0], (array) $data2[0]);
                         return response()->json($res,200);
                     } else {
-                        RespondensModel::destroy(['id'=>$data->id],true);
                         $res = new \stdClass();
                         $res->error_code    = 5;
-                        $res->error_desc    = 'Gagal menambahkan demografi';
+                        $res->error_desc    = 'Gagal mengubah demografi';
                         $res->data          = [];
                         return response()->json($res,500);
                     }
                 } else {
                     $res = new \stdClass();
-                    $res->error_code    = 5;
-                    $res->error_desc    = 'Gagal menambahkan responden';
+                    $res->error_code    = 4;
+                    $res->error_desc    = 'ID tidak ditemukan';
                     $res->data          = [];
                     return response()->json($res,200);
                 }
@@ -254,7 +255,7 @@ class Main extends Controller{
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = [];
+            $res->data          = $e->getMessage();
             return response()->json($res,200);
         }
     }
@@ -262,7 +263,8 @@ class Main extends Controller{
     public function deleteResponden(Request $request, $id){
         $dataToken = $request->input('dataToken');
         try {
-            $data = RespondensModel::destroy(['id'=>$id]);
+            $collection = RespondensModel::destroy(['id'=>$id]);
+            $data = $collection->toArray();
             if($data) {
                 $res = new \stdClass();
                 $res->error_code    = 0;
@@ -271,8 +273,8 @@ class Main extends Controller{
                 return response()->json($res,200);
             } else {
                 $res = new \stdClass();
-                $res->error_code    = 5;
-                $res->error_desc    = 'Internal Server Error';
+                $res->error_code    = 1;
+                $res->error_desc    = 'No Action';
                 $res->data          = $e;
                 return response()->json($res,200);
             }
@@ -280,7 +282,7 @@ class Main extends Controller{
             $res = new \stdClass();
             $res->error_code    = 5;
             $res->error_desc    = 'Internal Server Error';
-            $res->data          = $e;
+            $res->data          = $e->getMessage();
             return response()->json($res,200);
         }
     }
