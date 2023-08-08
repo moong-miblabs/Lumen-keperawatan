@@ -35,11 +35,8 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 
 
 > Laravel Collection always return ***TRUE***
-
 > Empty Array return ***FALSE***
-
 > Use `toArray()` for convert Laravel Collection to Array of Associative Array
-
 > Use `isEmpty()` for check Laravel Collection is empty. return **_TRUE_** if empty 
 
 ## Setup - 1 : config, cors and prepare for model requirement
@@ -168,408 +165,442 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 	2. seed
 	3. drop
 
-## Setup - 3 : create Bcrypt Helper
+## Setup - 3 : routing
+
+1. basic
+    ```php
+    $router->get('/', function () use ($router) {
+        return 'Back-End Keperawatan by Lumen Laravel';
+    });
+
+    $router->group(['prefix' => 'setup'], function () use ($router) {
+        $router->get('dbsync', ['uses'=>'Setup@dbsync']);
+        $router->get('seed', ['uses'=>'Setup@seed']);
+        $router->get('drop', ['uses'=>'Setup@drop']);
+    });
+    ```
+2. 404 Not Found in `app/Exceptions/Handler.php`
+    add this in the top
+    ```php
+    use Symfony\Component\HttpKernel\Exception\HttpException;
+    ```
+    add if in render function
+    ```php
+    public function render($request, Throwable $exception)
+    {
+        if($exception instanceof NotFoundHttpException){
+            $res = new \stdClass();
+            $res->error_code = 404;
+            $res->error_desc = 'Not Found';
+            $res->data = [];
+            return response()->json($res,200);
+        }
+        return parent::render($request, $exception);
+    }
+    ```
+
+## Setup - 4 : create Bcrypt Helper
 
 1. create bcrypt helper
 2. create directory `Helper` in `app` (if not exists)
 3. create file `BcryptHelper.php` in `app/Helper/BcryptHelper.php`
-```php
-<?php
+    ```php
+    <?php
 
-namespace App\Helper;
+    namespace App\Helper;
 
-class BcryptHelper{
+    class BcryptHelper{
 
-    public static function hash($str){
-        return password_hash($str, PASSWORD_BCRYPT, ["cost" => 10]);
+        public static function hash($str){
+            return password_hash($str, PASSWORD_BCRYPT, ["cost" => 10]);
+        }
+
+        public static function compare($password,$hash){
+            return password_verify($password,$hash);
+        }
     }
+    ```
 
-    public static function compare($password,$hash){
-        return password_verify($password,$hash);
-    }
-}
-```
-
-## Setup - 4 : create Jsonwebtoken Helper
+## Setup - 5 : create Jsonwebtoken Helper
 
 1. create jsonwebtoken helper
 2. run composer `composer require firebase/php-jwt`
 3. create directory `Helper` in `app` (if not exists)
 4. create file `JsonwebtokenHelper.php` in `app/Helper/JsonwebtokenHelper.php`
-```php
-<?php
+    ```php
+    <?php
 
-namespace App\Helper;
+    namespace App\Helper;
 
-use \Firebase\JWT\JWT;
-use \Firebase\JWT\Key;
+    use \Firebase\JWT\JWT;
+    use \Firebase\JWT\Key;
 
-class JsonwebtokenHelper{
+    class JsonwebtokenHelper{
 
-    public static function sign($assocArr){
-        $key = config('app.key');
-        $assocArr['iat'] = strtotime("now");
-        // JWT::$leeway = 60; // $leeway in seconds
-        return JWT::encode($assocArr, $key, 'HS256');
-    }
+        public static function sign($assocArr){
+            $key = config('app.key');
+            $assocArr['iat'] = strtotime("now");
+            // JWT::$leeway = 60; // $leeway in seconds
+            return JWT::encode($assocArr, $key, 'HS256');
+        }
 
-    public static function verify($token){
-        $key = config('app.key');
-        try {
-            $decode = JWT::decode($token, new Key($key, 'HS256'));
-            return $decode;
-        } catch(\Exception $e) {
-            return false;
+        public static function verify($token){
+            $key = config('app.key');
+            try {
+                $decode = JWT::decode($token, new Key($key, 'HS256'));
+                return $decode;
+            } catch(\Exception $e) {
+                return false;
+            }
         }
     }
-}
-```
+    ```
 
-## Setup - 5 : create middlewares (apiget, apipost, auth)
+## Setup - 6 : create middlewares (apiget, apipost, auth)
 
 1. create file `ApiGetMiddleware.php` in `app/Http/Middleware/ApiGetMiddleware.php`
-```php
-<?php
+    ```php
+    <?php
 
-namespace App\Http\Middleware;
+    namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Response;
+    use Closure;
+    use Illuminate\Http\Response;
 
-use App\Models\RespondensModel;
+    use App\Models\RespondensModel;
 
-class ApiGetMiddleware{
-    public function handle($request, Closure $next){
-        $username = $request->query('id');
-        try {
-            $data = RespondensModel::findOne(['username_responden'=>$username]);
-            if($data){
-                $request->merge(['dataResponden' => (array) $data]);
-                return $next($request);
-            } else {
+    class ApiGetMiddleware{
+        public function handle($request, Closure $next){
+            $username = $request->query('id');
+            try {
+                $data = RespondensModel::findOne(['username_responden'=>$username]);
+                if($data){
+                    $request->merge(['dataResponden' => (array) $data]);
+                    return $next($request);
+                } else {
+                    $res = new \stdClass();
+                    $res->error_code = 4;
+                    $res->error_desc = 'Unauthorized';
+                    $res->data = [];
+                    return response()->json($res,200);
+                }
+            } catch(\Exception $e) {
                 $res = new \stdClass();
-                $res->error_code = 4;
-                $res->error_desc = 'Unauthorized';
-                $res->data = [];
+                $res->error_code = 5;
+                $res->error_desc = 'Internal Server Error';
+                $res->data = $e;
                 return response()->json($res,200);
             }
-        } catch(\Exception $e) {
-            $res = new \stdClass();
-            $res->error_code = 5;
-            $res->error_desc = 'Internal Server Error';
-            $res->data = $e;
-            return response()->json($res,200);
         }
     }
-}
 
-```
+    ```
 2. create file `ApiPostMiddleware.php` in `app/Http/Middleware/ApiPostMiddleware.php`
-```php
-<?php
+    ```php
+    <?php
 
-namespace App\Http\Middleware;
+    namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Response;
+    use Closure;
+    use Illuminate\Http\Response;
 
-use App\Models\RespondensModel;
+    use App\Models\RespondensModel;
 
-class ApiPostMiddleware{
-    public function handle($request, Closure $next){
-        $username = $request->input('id');
-        try {
-            $data = RespondensModel::findOne(['username_responden'=>$username]);
-            if($data){
-                $request->merge(['dataResponden' => (array) $data]);
-                return $next($request);
-            } else {
+    class ApiPostMiddleware{
+        public function handle($request, Closure $next){
+            $username = $request->input('id');
+            try {
+                $data = RespondensModel::findOne(['username_responden'=>$username]);
+                if($data){
+                    $request->merge(['dataResponden' => (array) $data]);
+                    return $next($request);
+                } else {
+                    $res = new \stdClass();
+                    $res->error_code = 4;
+                    $res->error_desc = 'Unauthorized';
+                    $res->data = [];
+                    return response()->json($res,200);
+                }
+            } catch(\Exception $e) {
                 $res = new \stdClass();
-                $res->error_code = 4;
-                $res->error_desc = 'Unauthorized';
-                $res->data = [];
+                $res->error_code = 5;
+                $res->error_desc = 'Internal Server Error';
+                $res->data = $e;
                 return response()->json($res,200);
             }
-        } catch(\Exception $e) {
-            $res = new \stdClass();
-            $res->error_code = 5;
-            $res->error_desc = 'Internal Server Error';
-            $res->data = $e;
-            return response()->json($res,200);
         }
     }
-}
 
-```
+    ```
 3. create file `AuthMiddleware.php` in `app/Http/Middleware/AuthMiddleware.php`
-```php
-<?php
+    ```php
+    <?php
 
-namespace App\Http\Middleware;
+    namespace App\Http\Middleware;
 
-use Closure;
-use Illuminate\Http\Response;
+    use Closure;
+    use Illuminate\Http\Response;
 
-use App\Helper\JsonwebtokenHelper;
+    use App\Helper\JsonwebtokenHelper;
 
-class AuthMiddleware{
-    public function handle($request, Closure $next){
-        $token = $request->header('Authorization');
-        if(!$token) {
-            if ($request->isMethod('post')) {
-                $token = $request->input('token');
-            } else {
-                $token = $request->query('token');
+    class AuthMiddleware{
+        public function handle($request, Closure $next){
+            $token = $request->header('Authorization');
+            if(!$token) {
+                if ($request->isMethod('post')) {
+                    $token = $request->input('token');
+                } else {
+                    $token = $request->query('token');
+                }
+                if(!$token){
+                    $res = new \stdClass();
+                    $res->error_code = 4;
+                    $res->error_desc = 'Unauthorized';
+                    $res->data = [];
+                    return response()->json($res,200);
+                }
             }
-            if(!$token){
+            try {
+                $decoded = JsonwebtokenHelper::verify($token);
+                if($decoded){
+                    $request->merge(['dataToken' => (array) $decoded]);
+                    return $next($request);
+                } else {
+                    $res = new \stdClass();
+                    $res->error_code = 4;
+                    $res->error_desc = 'Unauthorized';
+                    $res->data = [];
+                    return response()->json($res,200);
+                }
+            } catch(\Exception $e) {
+                return $e;
                 $res = new \stdClass();
-                $res->error_code = 4;
-                $res->error_desc = 'Unauthorized';
-                $res->data = [];
+                $res->error_code = 5;
+                $res->error_desc = 'Internal Server Error';
+                $res->data = $e;
                 return response()->json($res,200);
             }
-        }
-        try {
-            $decoded = JsonwebtokenHelper::verify($token);
-            if($decoded){
-                $request->merge(['dataToken' => (array) $decoded]);
-                return $next($request);
-            } else {
-                $res = new \stdClass();
-                $res->error_code = 4;
-                $res->error_desc = 'Unauthorized';
-                $res->data = [];
-                return response()->json($res,200);
-            }
-        } catch(\Exception $e) {
-            return $e;
-            $res = new \stdClass();
-            $res->error_code = 5;
-            $res->error_desc = 'Internal Server Error';
-            $res->data = $e;
-            return response()->json($res,200);
         }
     }
-}
-```
+    ```
 
-## Setup - 6 : upload file
+## Setup - 7 : upload file
 
 1. install league/flysystem, via `composer require league/flysystem:^3.0`. Because Lumen dont have any storage, so we must install manually
 2. (Optional) create DateFormatHelper.php in `app/Http/Middleware/DateFormatMiddleware.php`
-```php
-<?php
+    ```php
+    <?php
 
-namespace App\Helper;
+    namespace App\Helper;
 
-class DateFormatHelper{
+    class DateFormatHelper{
 
-    public static $arr_hari = [1=>'Senin','Selasa','Rabu','Kamis','Jum\'at','Sabtu','Minggu'];
-    public static $arr_bulan = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    public static $arr_bln = [1=>'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+        public static $arr_hari = [1=>'Senin','Selasa','Rabu','Kamis','Jum\'at','Sabtu','Minggu'];
+        public static $arr_bulan = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        public static $arr_bln = [1=>'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
-    public static function file($d=null){
-        date_default_timezone_set("Asia/Jakarta");
-        if($d) {
-            return date('YmdHis',strtotime($d));
-        } else {
-            return date('YmdHis');
+        public static function file($d=null){
+            date_default_timezone_set("Asia/Jakarta");
+            if($d) {
+                return date('YmdHis',strtotime($d));
+            } else {
+                return date('YmdHis');
+            }
+        }
+
+        public static function human($d=null){
+            date_default_timezone_set("Asia/Jakarta");
+            if($d) {
+                $num_hari = date('N',strtotime($d));
+            } else {
+                $num_hari = date('N');
+            }
+            $hari = self::$arr_hari[$num_hari];
+
+            if($d) {
+                $num_bulan = date('n',strtotime($d));
+            } else {
+                $num_bulan = date('n');
+            }
+            $bulan = self::$arr_bulan[$num_bulan];
+
+            if($d) {
+                $tgl = date('j',strtotime($d));
+            } else {
+                $tgl = date('j');
+            }
+            
+            if($d) {
+                return $hari . ", " . $tgl . " " . $bulan . " " . date('Y H:i',strtotime($d));
+            } else {
+                return $hari . ", " . $tgl . " " . $bulan . " " . date('Y H:i');
+            }
+        }
+
+        public static function humanDate($d=null){
+            date_default_timezone_set("Asia/Jakarta");
+            if($d) {
+                $num_hari = date('N',strtotime($d));
+            } else {
+                $num_hari = date('N');
+            }
+            $hari = self::$arr_hari[$num_hari];
+
+            if($d) {
+                $num_bulan = date('n',strtotime($d));
+            } else {
+                $num_bulan = date('n');
+            }
+            $bulan = self::$arr_bulan[$num_bulan];
+
+            if($d) {
+                $tgl = date('j',strtotime($d));
+            } else {
+                $tgl = date('j');
+            }
+            
+            if($d) {
+                return $hari . ", " . $tgl . " " . $bulan . " " . date('Y',strtotime($d));
+            } else {
+                return $hari . ", " . $tgl . " " . $bulan . " " . date('Y');
+            }
+        }
+
+        public static function dateGT($tanggal){
+            date_default_timezone_set("Asia/Jakarta");
+            $now        = date('Ymd');
+            $compare    = date('Ymd',strtotime($tanggal));
+
+            if($now>$compare) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public static function dateLT($tanggal){
+            date_default_timezone_set("Asia/Jakarta");
+            $now        = date('Ymd');
+            $compare    = date('Ymd',strtotime($tanggal));
+
+            if($now<$compare) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public static function dateGTE($tanggal){
+            date_default_timezone_set("Asia/Jakarta");
+            $now        = date('Ymd');
+            $compare    = date('Ymd',strtotime($tanggal));
+
+            if($now>=$compare) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public static function dateLTE($tanggal){
+            date_default_timezone_set("Asia/Jakarta");
+            $now        = date('Ymd');
+            $compare    = date('Ymd',strtotime($tanggal));
+
+            if($now<=$compare) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
-
-    public static function human($d=null){
-        date_default_timezone_set("Asia/Jakarta");
-        if($d) {
-            $num_hari = date('N',strtotime($d));
-        } else {
-            $num_hari = date('N');
-        }
-        $hari = self::$arr_hari[$num_hari];
-
-        if($d) {
-            $num_bulan = date('n',strtotime($d));
-        } else {
-            $num_bulan = date('n');
-        }
-        $bulan = self::$arr_bulan[$num_bulan];
-
-        if($d) {
-            $tgl = date('j',strtotime($d));
-        } else {
-            $tgl = date('j');
-        }
-        
-        if($d) {
-            return $hari . ", " . $tgl . " " . $bulan . " " . date('Y H:i',strtotime($d));
-        } else {
-            return $hari . ", " . $tgl . " " . $bulan . " " . date('Y H:i');
-        }
-    }
-
-    public static function humanDate($d=null){
-        date_default_timezone_set("Asia/Jakarta");
-        if($d) {
-            $num_hari = date('N',strtotime($d));
-        } else {
-            $num_hari = date('N');
-        }
-        $hari = self::$arr_hari[$num_hari];
-
-        if($d) {
-            $num_bulan = date('n',strtotime($d));
-        } else {
-            $num_bulan = date('n');
-        }
-        $bulan = self::$arr_bulan[$num_bulan];
-
-        if($d) {
-            $tgl = date('j',strtotime($d));
-        } else {
-            $tgl = date('j');
-        }
-        
-        if($d) {
-            return $hari . ", " . $tgl . " " . $bulan . " " . date('Y',strtotime($d));
-        } else {
-            return $hari . ", " . $tgl . " " . $bulan . " " . date('Y');
-        }
-    }
-
-    public static function dateGT($tanggal){
-        date_default_timezone_set("Asia/Jakarta");
-        $now        = date('Ymd');
-        $compare    = date('Ymd',strtotime($tanggal));
-
-        if($now>$compare) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static function dateLT($tanggal){
-        date_default_timezone_set("Asia/Jakarta");
-        $now        = date('Ymd');
-        $compare    = date('Ymd',strtotime($tanggal));
-
-        if($now<$compare) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static function dateGTE($tanggal){
-        date_default_timezone_set("Asia/Jakarta");
-        $now        = date('Ymd');
-        $compare    = date('Ymd',strtotime($tanggal));
-
-        if($now>=$compare) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static function dateLTE($tanggal){
-        date_default_timezone_set("Asia/Jakarta");
-        $now        = date('Ymd');
-        $compare    = date('Ymd',strtotime($tanggal));
-
-        if($now<=$compare) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
-```
+    ```
 3. script Contoller for uploading like shown below
-```php
-use Illuminate\Support\Facades\Storage;
-// if file sent as based64
-// then hasFile return false
-if($request->hasFile('foto')) {
-    $file       = $request->file('foto');
-    $extension  = $file->extension();
+    ```php
+    use Illuminate\Support\Facades\Storage;
+    // if file sent as based64
+    // then hasFile return false
+    if($request->hasFile('foto')) {
+        $file       = $request->file('foto');
+        $extension  = $file->extension();
 
-    $destination_path   = './public/foto/';
-    $file_name          = DateFormatHelper::file() . '@'. $dataResponden['id'] . '.' . $extension;
-    $file->move($destination_path,$file_name);
-}
-// if file sent as based64
-// then input variabel (this case : foto) contain string 
-else {
-    // we need use Illuminate\Support\Facades\Storage;
-    $file_name  = DateFormatHelper::file() . '@'. $dataResponden['id'] . '.jpg';
-    $image      = base64_decode($request->input('foto'));
-    
-    $disk       = Storage::build([
-        'driver'    => 'local',
-        'root'      => 'public/foto',
-    ]);
-    $disk->put($file_name,$image);
-}
-// foto variabel for DB insert will set path of the file
-$foto       = '/public/foto/'.$file_name;
-```
+        $destination_path   = './public/foto/';
+        $file_name          = DateFormatHelper::file() . '@'. $dataResponden['id'] . '.' . $extension;
+        $file->move($destination_path,$file_name);
+    }
+    // if file sent as based64
+    // then input variabel (this case : foto) contain string 
+    else {
+        // we need use Illuminate\Support\Facades\Storage;
+        $file_name  = DateFormatHelper::file() . '@'. $dataResponden['id'] . '.jpg';
+        $image      = base64_decode($request->input('foto'));
+        
+        $disk       = Storage::build([
+            'driver'    => 'local',
+            'root'      => 'public/foto',
+        ]);
+        $disk->put($file_name,$image);
+    }
+    // foto variabel for DB insert will set path of the file
+    $foto       = '/public/foto/'.$file_name;
+    ```
 
 
-## setup 7 : Download MS Excel (.xlsx)
+## setup 8 : Download MS Excel (.xlsx)
 
 1. Install Laravel Excel via composer `composer require maatwebsite/excel`
 2. add the ServiceProvider in `bootstrap/app.php`
-```php
-    /*
-    |--------------------------------------------------------------------------
-    | Register Service Providers
-    |--------------------------------------------------------------------------
-    |
-    | Here we will register all of the application's service providers which
-    | are used to bind services into the container. Service providers are
-    | totally optional, so you are not required to uncomment this line.
-    |
-    */
+    ```php
+        /*
+        |--------------------------------------------------------------------------
+        | Register Service Providers
+        |--------------------------------------------------------------------------
+        |
+        | Here we will register all of the application's service providers which
+        | are used to bind services into the container. Service providers are
+        | totally optional, so you are not required to uncomment this line.
+        |
+        */
 
-    $app->register(Maatwebsite\Excel\ExcelServiceProvider::class);
-    // $app->register(App\Providers\AppServiceProvider::class);
-    // $app->register(App\Providers\AuthServiceProvider::class);
-    // $app->register(App\Providers\EventServiceProvider::class);
-```
+        $app->register(Maatwebsite\Excel\ExcelServiceProvider::class);
+        // $app->register(App\Providers\AppServiceProvider::class);
+        // $app->register(App\Providers\AuthServiceProvider::class);
+        // $app->register(App\Providers\EventServiceProvider::class);
+    ```
 3. you can create file `RespondensExport` in `app/Exports`
-```php
+    ```php
+        <?php
+
+        namespace App\Exports;
+
+        use App\Models\RespondensModel;
+        use Maatwebsite\Excel\Concerns\FromCollection;
+
+        class RespondensExport implements FromCollection
+        {
+            public function collection()
+            {
+                return RespondensModel::findAll();
+            }
+        }
+    ```
+4. In your controller you can call this export now
+    ```php
     <?php
 
-    namespace App\Exports;
+    namespace App\Http\Controllers;
 
-    use App\Models\RespondensModel;
-    use Maatwebsite\Excel\Concerns\FromCollection;
+    use App\Exports\RespondensExport;
+    use Maatwebsite\Excel\Facades\Excel;
 
-    class RespondensExport implements FromCollection
+    class UsersController extends Controller 
     {
-        public function collection()
+        public function export() 
         {
-            return RespondensModel::findAll();
+            return Excel::download(new RespondensExport, 'respondens.xlsx');
         }
     }
-```
-4. In your controller you can call this export now
-```php
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Exports\RespondensExport;
-use Maatwebsite\Excel\Facades\Excel;
-
-class UsersController extends Controller 
-{
-    public function export() 
-    {
-        return Excel::download(new RespondensExport, 'respondens.xlsx');
-    }
-}
-```
+    ```
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
 

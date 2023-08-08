@@ -49,6 +49,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        if($exception instanceof NotFoundHttpException){
+            $res = new \stdClass();
+            $res->error_code = 404;
+            $res->error_desc = 'Not Found';
+            $res->data = [];
+            return response()->json($res,200);
+        }
         return parent::render($request, $exception);
     }
 }
