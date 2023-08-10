@@ -37,11 +37,10 @@ class AuthMiddleware{
                 return response()->json($res,200);
             }
         } catch(\Exception $e) {
-            return $e;
             $res = new \stdClass();
             $res->error_code = 5;
             $res->error_desc = 'Internal Server Error';
-            $res->data = $e;
+            $res->data = $e->getMessage();
             return response()->json($res,200);
         }
     }

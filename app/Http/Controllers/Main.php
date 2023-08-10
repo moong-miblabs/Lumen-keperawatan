@@ -275,7 +275,7 @@ class Main extends Controller{
                 $res = new \stdClass();
                 $res->error_code    = 1;
                 $res->error_desc    = 'No Action';
-                $res->data          = $e;
+                $res->data          = [];
                 return response()->json($res,200);
             }
         } catch(\Execption $e) {
