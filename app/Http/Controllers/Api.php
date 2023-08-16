@@ -30,11 +30,7 @@ class Api extends Controller{
                 return new Response('fail', 200);
             }
         } catch(\Exception $e) {
-            $res = new \stdClass();
-            $res->error_code = 5;
-            $res->error_desc = 'Internal Server Error';
-            $res->data = $e;
-            return response()->json($res,200);
+            return new Response($e->getMessage(), 200);
         }
     }
 

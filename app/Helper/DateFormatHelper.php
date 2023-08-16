@@ -122,4 +122,37 @@ class DateFormatHelper{
             return false;
         }
     }
+
+    public static function usia($tanggal_lahir,$tanggal_saat_itu=null){
+        date_default_timezone_set("Asia/Jakarta");
+        $thn_lhr = date('Y',strtotime($tanggal_lahir));
+        $bln_lhr = date('n',strtotime($tanggal_lahir));
+        $tgl_lhr = date('j',strtotime($tanggal_lahir));
+
+        if($tanggal_saat_itu) {
+            $thn_itu = date('Y',strtotime($tanggal_saat_itu));
+            $bln_itu = date('n',strtotime($tanggal_saat_itu));
+            $tgl_itu = date('j',strtotime($tanggal_saat_itu));
+        } else {
+            $thn_itu = date('Y');
+            $bln_itu = date('n');
+            $tgl_itu = date('j');
+        }
+
+        if($tgl_itu - $tgl_lhr < 0) {
+            $tgl_itu += 30;
+            $bln_itu --;
+        }
+
+        if($bln_itu - $bln_lhr < 0){
+            $bln_itu += 12;
+            $thn_itu --;
+        }
+
+        return [
+            'tahun' => $thn_itu-$thn_lhr,
+            'bulan' => $bln_itu-$bln_lhr,
+            'hari'  => $tgl_itu-$tgl_lhr
+        ];
+    }
 }
