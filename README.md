@@ -186,6 +186,7 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
     add this in the top
     ```php
     use Symfony\Component\HttpKernel\Exception\HttpException;
+    use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
     ```
     add if in render function
     ```php
