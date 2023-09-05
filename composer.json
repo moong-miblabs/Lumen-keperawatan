@@ -9,6 +9,7 @@
         "firebase/php-jwt": "^6.8",
         "laravel/lumen-framework": "^9.0",
         "nesbot/carbon": "^2.68",
+        "pyaesoneaung/to-raw-sql": "^1.1",
         "ramsey/uuid": "^4.7"
     },
     "require-dev": {
