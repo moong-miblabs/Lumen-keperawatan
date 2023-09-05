@@ -130,7 +130,8 @@ The Lumen framework is open-sourced software licensed under the [MIT license](ht
 	```
 4. Install ramsey/uuid, via `composer require ramsey/uuid`
 5. Install nesbot/carbon, via `composer require nesbot/carbon`
-6. (Optional) create Uuid helper
+6. Install pyaesoneaung/to-raw-sql, via `composer require pyaesoneaung/to-raw-sql`
+7. (Optional) create Uuid helper
     1. create directory `Helper` in `app` (if not exists)
     2. create file `BcryptHelper.php` in `app/Helper/BcryptHelper.php`
     ```php
